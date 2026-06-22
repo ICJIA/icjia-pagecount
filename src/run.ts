@@ -1,5 +1,5 @@
 import { resolve, dirname, basename, extname, join } from 'node:path';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, rm } from 'node:fs/promises';
 import type { Config } from './config';
 import { classifyInput } from './input';
 import { processSpreadsheet } from './spreadsheet/process';
@@ -27,9 +27,13 @@ async function runSpreadsheet(path: string, cfg: Config): Promise<void> {
     { header: `${cfg.countColumn}_notes`, values: notes },
   ]);
   console.log(formatSpreadsheetSummary(path, outPath, summary));
+  // The output is a derived artifact: overwrite it, and keep .pagecount-output to the
+  // single latest result by removing a stale JSON sidecar when --json isn't used.
+  const jsonPath = outPath.replace(/\.[^.]+$/, '.json');
   if (cfg.json) {
-    const jsonPath = outPath.replace(/\.[^.]+$/, '.json');
     await writeFile(jsonPath, JSON.stringify(buildSpreadsheetJson(path, outPath, results, summary), null, 2));
+  } else {
+    await rm(jsonPath, { force: true });
   }
 }
 
