@@ -58,7 +58,8 @@ describe('run — spreadsheet mode (end-to-end)', () => {
     const code = await run([file], resolveConfig({ allowPrivateHosts: true }));
     expect(code).toBe(0);
     const outPath = outputPathFor(file, resolveConfig({ allowPrivateHosts: true }));
-    await stat(outPath); // throws if missing
+    await stat(outPath); // csv exists
+    await stat(outPath.replace(/\.csv$/, '.xlsx')); // xlsx also written
     const text = await readFile(outPath, 'utf8');
     expect(text).toContain('Name,Link,programmatic_page_count,programmatic_page_count_notes');
     expect(text).toContain(',4,');

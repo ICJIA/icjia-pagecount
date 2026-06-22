@@ -8,30 +8,43 @@ import {
   formatSpreadsheetSummary, buildSpreadsheetJson, formatDocumentLine, buildDocumentJson,
 } from './report';
 
-export function outputPathFor(inputPath: string, cfg: Config): string {
+// Output path without an extension: <dir>/<name>-<suffix>
+export function outputBaseFor(inputPath: string, cfg: Config): string {
   const abs = resolve(inputPath);
   const ext = extname(abs);
   const base = basename(abs, ext);
-  const name = cfg.suffix ? `${base}-${cfg.suffix}${ext}` : `${base}${ext}`;
+  const name = cfg.suffix ? `${base}-${cfg.suffix}` : base;
   const dir = cfg.output ?? join(dirname(abs), '.pagecount-output');
   return join(dir, name);
+}
+
+export function outputPathFor(inputPath: string, cfg: Config): string {
+  return `${outputBaseFor(inputPath, cfg)}${extname(resolve(inputPath))}`;
 }
 
 async function runSpreadsheet(path: string, cfg: Config): Promise<void> {
   const { loaded, results, summary, counts } = await processSpreadsheet(path, cfg);
   const notes = results.map((r) => (r.status === 'ok' ? '' : r.status));
-  const outPath = outputPathFor(path, cfg);
-  await mkdir(dirname(outPath), { recursive: true });
-  await loaded.write(outPath, [
+  const columns = [
     { header: cfg.countColumn, values: counts },
     { header: `${cfg.countColumn}_notes`, values: notes },
-  ]);
-  console.log(formatSpreadsheetSummary(path, outPath, summary));
-  // The output is a derived artifact: overwrite it, and keep .pagecount-output to the
-  // single latest result by removing a stale JSON sidecar when --json isn't used.
-  const jsonPath = outPath.replace(/\.[^.]+$/, '.json');
+  ];
+
+  const base = outputBaseFor(path, cfg);
+  await mkdir(dirname(base), { recursive: true });
+  // Always write both a CSV and an XLSX version of the result.
+  await loaded.writeCsv(`${base}.csv`, columns);
+  await loaded.writeXlsx(`${base}.xlsx`, columns);
+  console.log(formatSpreadsheetSummary(path, outputPathFor(path, cfg), summary));
+
+  // Keep .pagecount-output to the single latest result: write the JSON sidecar only
+  // with --json, and remove a stale one otherwise.
+  const jsonPath = `${base}.json`;
   if (cfg.json) {
-    await writeFile(jsonPath, JSON.stringify(buildSpreadsheetJson(path, outPath, results, summary), null, 2));
+    await writeFile(
+      jsonPath,
+      JSON.stringify(buildSpreadsheetJson(path, `${base}.csv`, results, summary), null, 2),
+    );
   } else {
     await rm(jsonPath, { force: true });
   }

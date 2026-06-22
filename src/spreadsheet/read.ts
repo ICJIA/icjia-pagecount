@@ -1,16 +1,28 @@
 import { extname } from 'node:path';
 import type { AppendColumn } from '../types';
 import { readCsv, writeCsv } from './csv';
-import { readXlsx, writeXlsx } from './xlsx';
+import { readXlsx, writeXlsx, writeXlsxFromData } from './xlsx';
 
 export interface LoadedSpreadsheet {
   header: string[];
   rows: string[][];
-  write: (outPath: string, columns: AppendColumn[]) => Promise<void>;
+  writeCsv: (outPath: string, columns: AppendColumn[]) => Promise<void>;
+  writeXlsx: (outPath: string, columns: AppendColumn[]) => Promise<void>;
 }
 
 function cell(value: string | number | null | undefined): string {
   return value == null ? '' : String(value);
+}
+
+function appended(
+  header: string[],
+  rows: string[][],
+  columns: AppendColumn[],
+): { header: string[]; rows: string[][] } {
+  return {
+    header: [...header, ...columns.map((c) => c.header)],
+    rows: rows.map((r, i) => [...r, ...columns.map((c) => cell(c.values[i]))]),
+  };
 }
 
 export async function readSpreadsheet(path: string): Promise<LoadedSpreadsheet> {
@@ -21,12 +33,11 @@ export async function readSpreadsheet(path: string): Promise<LoadedSpreadsheet> 
     return {
       header,
       rows,
-      write: (outPath, columns) =>
-        writeCsv(
-          outPath,
-          [...header, ...columns.map((c) => c.header)],
-          rows.map((r, i) => [...r, ...columns.map((c) => cell(c.values[i]))]),
-        ),
+      writeCsv: (outPath, columns) => {
+        const t = appended(header, rows, columns);
+        return writeCsv(outPath, t.header, t.rows);
+      },
+      writeXlsx: (outPath, columns) => writeXlsxFromData(outPath, header, rows, columns),
     };
   }
 
@@ -35,7 +46,11 @@ export async function readSpreadsheet(path: string): Promise<LoadedSpreadsheet> 
     return {
       header: data.header,
       rows: data.rows,
-      write: (outPath, columns) => writeXlsx(data, outPath, columns),
+      writeCsv: (outPath, columns) => {
+        const t = appended(data.header, data.rows, columns);
+        return writeCsv(outPath, t.header, t.rows);
+      },
+      writeXlsx: (outPath, columns) => writeXlsx(data, outPath, columns),
     };
   }
 

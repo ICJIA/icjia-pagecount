@@ -28,6 +28,8 @@ export async function readXlsx(path: string): Promise<XlsxData> {
   return { header, rows, workbook, sheet };
 }
 
+// Append columns to the already-loaded workbook and write it out, preserving the
+// original formatting and any other sheets.
 export async function writeXlsx(
   data: Pick<XlsxData, 'workbook' | 'sheet'>,
   outPath: string,
@@ -42,6 +44,27 @@ export async function writeXlsx(
       const value = col.values[i];
       if (value != null && value !== '') sheet.getRow(i + 2).getCell(c).value = value;
     }
+  });
+  await workbook.xlsx.writeFile(outPath);
+}
+
+// Build a fresh workbook from plain header/rows plus appended columns. Used to emit
+// an XLSX version of a CSV input (numeric values stay numeric).
+export async function writeXlsxFromData(
+  outPath: string,
+  header: string[],
+  rows: string[][],
+  columns: AppendColumn[],
+): Promise<void> {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('Sheet1');
+  sheet.addRow([...header, ...columns.map((c) => c.header)]);
+  rows.forEach((r, i) => {
+    const extra = columns.map((c) => {
+      const v = c.values[i];
+      return v == null || v === '' ? '' : v;
+    });
+    sheet.addRow([...r, ...extra]);
   });
   await workbook.xlsx.writeFile(outPath);
 }

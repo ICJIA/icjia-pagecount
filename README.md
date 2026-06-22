@@ -45,12 +45,13 @@ pdf/docx/pptx files), counts pages, and writes:
 
 ```
 ./.pagecount-output/data-pagecount.csv
+./.pagecount-output/data-pagecount.xlsx
 ```
 
 The output is the original spreadsheet with **two columns appended at the far right**:
 `programmatic_page_count` (the count) and `programmatic_page_count_notes` (why a row is
 blank — e.g. `corrupt`, `unsupported`, `no-url`). They're always added, even if the
-sheet already has a "Page Count" column. The `.pagecount-output` directory is created
+sheet already has a "Page Count" column. **Both a `.csv` and an `.xlsx` version are written every run.** The `.pagecount-output` directory is created
 beside the input file (and reused if it already exists). The same works for `.xlsx`,
 preserving the workbook's formatting and any extra sheets.
 

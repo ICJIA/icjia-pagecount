@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { readXlsx, writeXlsx } from '../../src/spreadsheet/xlsx';
+import { readXlsx, writeXlsx, writeXlsxFromData } from '../../src/spreadsheet/xlsx';
 import { writeXlsxFile } from '../helpers/fixtures';
 
 async function tmpDir(): Promise<string> {
@@ -39,6 +39,21 @@ describe('xlsx read/write', () => {
     await writeXlsxFile(file, ['Name', 'URL'], [['A', 'u1'], ['B', 'u2']]);
     const data = await readXlsx(file);
     await writeXlsx(data, out, [
+      { header: 'programmatic_page_count', values: [3, null] },
+      { header: 'programmatic_page_count_notes', values: ['', 'corrupt'] },
+    ]);
+    const reread = await readXlsx(out);
+    expect(reread.header).toEqual([
+      'Name', 'URL', 'programmatic_page_count', 'programmatic_page_count_notes',
+    ]);
+    expect(reread.rows[0]).toEqual(['A', 'u1', '3', '']);
+    expect(reread.rows[1]).toEqual(['B', 'u2', '', 'corrupt']);
+  });
+
+  it('writeXlsxFromData builds a fresh workbook from plain data', async () => {
+    const dir = await tmpDir();
+    const out = join(dir, 'fresh.xlsx');
+    await writeXlsxFromData(out, ['Name', 'URL'], [['A', 'u1'], ['B', 'u2']], [
       { header: 'programmatic_page_count', values: [3, null] },
       { header: 'programmatic_page_count_notes', values: ['', 'corrupt'] },
     ]);
