@@ -28,7 +28,7 @@ beforeAll(async () => {
 
 afterAll(() => new Promise<void>((r) => server.close(() => r())));
 
-const cfg = resolveConfig({});
+const cfg = resolveConfig({ allowPrivateHosts: true });
 
 describe('countUrl', () => {
   it('counts a pdf identified by extension', async () => {

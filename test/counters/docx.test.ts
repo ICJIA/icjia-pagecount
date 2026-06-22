@@ -43,4 +43,27 @@ describe('countDocx', () => {
     const out = await countDocx(file, cfgForce, fakeRenderer(9));
     expect(out).toMatchObject({ pageCount: 9, status: 'ok', rendered: true });
   });
+
+  it('falls back to metadata when a forced render throws', async () => {
+    const throwingDeps: DocxDeps = {
+      findRenderer: () => 'soffice',
+      render: async () => { throw new Error('render failed'); },
+      countPdf: async () => { throw new Error('should not be called'); },
+    };
+    const file = await writeTemp(docxBytes({ pages: 4 }), 'a.docx');
+    const out = await countDocx(file, cfgForce, throwingDeps);
+    expect(out).toMatchObject({ pageCount: 4, status: 'ok' });
+    expect((out as { rendered?: boolean }).rendered).toBeUndefined();
+  });
+
+  it('reports no-page-data when render throws and there is no metadata', async () => {
+    const throwingDeps: DocxDeps = {
+      findRenderer: () => 'soffice',
+      render: async () => { throw new Error('render failed'); },
+      countPdf: async () => { throw new Error('should not be called'); },
+    };
+    const file = await writeTemp(docxBytes({}), 'a.docx');
+    const out = await countDocx(file, cfg, throwingDeps);
+    expect(out).toMatchObject({ pageCount: null, status: 'no-page-data' });
+  });
 });

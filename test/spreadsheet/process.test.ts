@@ -29,7 +29,7 @@ describe('processSpreadsheet', () => {
   it('counts URLs, blanks non-URLs, and summarizes failures', async () => {
     const csv = `Name,Link\nA,${base}/a.pdf\nB,\nC,not-a-url\nD,${base}/missing.pdf\n`;
     const file = await writeTemp(csv, 'in.csv');
-    const { results, summary, counts } = await processSpreadsheet(file, resolveConfig({}));
+    const { results, summary, counts } = await processSpreadsheet(file, resolveConfig({ allowPrivateHosts: true }));
     expect(counts).toEqual([3, null, null, null]);
     expect(results.map((r) => r.status)).toEqual(['ok', 'no-url', 'no-url', 'not-found']);
     expect(results[0].row).toBe(2);

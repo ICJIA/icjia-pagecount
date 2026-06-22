@@ -20,6 +20,7 @@ export function buildProgram(): Command {
     .option('--timeout <sec>', 'per-URL fetch timeout (default: 30)')
     .option('--max-size <mb>', 'skip files larger than this (default: 100)')
     .option('--docx-render', 'force LibreOffice render for docx')
+    .option('--allow-private-hosts', 'allow fetching loopback/private/link-local hosts (off by default for SSRF safety)')
     .version('0.1.0');
   return program;
 }
@@ -39,6 +40,7 @@ export async function main(argv: string[]): Promise<void> {
     timeout: opts.timeout,
     maxSize: opts.maxSize,
     docxRender: opts.docxRender,
+    allowPrivateHosts: opts.allowPrivateHosts,
   });
   process.exitCode = await run(program.args, cfg);
 }

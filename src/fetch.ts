@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import type { Config } from './config';
 import { CountError, statusFromHttp } from './errors';
+import { assertPublicUrl } from './ssrf';
 
 export interface FetchedFile {
   tempPath: string;
@@ -11,15 +12,30 @@ export interface FetchedFile {
   cleanup: () => Promise<void>;
 }
 
+const MAX_REDIRECTS = 5;
+const USER_AGENT = 'pagecount/0.1 (+https://github.com/ICJIA/icjia-pagecount)';
+
+async function followRedirects(initialUrl: string, cfg: Config, signal: AbortSignal): Promise<Response> {
+  let url = initialUrl;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    if (!cfg.allowPrivateHosts) await assertPublicUrl(url);
+    const res = await fetch(url, { signal, redirect: 'manual', headers: { 'user-agent': USER_AGENT } });
+    const loc = res.headers.get('location');
+    if (res.status >= 300 && res.status < 400 && loc) {
+      url = new URL(loc, url).toString();
+      await res.body?.cancel().catch(() => {});
+      continue;
+    }
+    return res;
+  }
+  throw new CountError('network-error', 'too many redirects');
+}
+
 export async function fetchToTempFile(url: string, cfg: Config): Promise<FetchedFile> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), cfg.timeout);
   try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      redirect: 'follow',
-      headers: { 'user-agent': 'pagecount/0.1 (+https://github.com/ICJIA/icjia-pagecount)' },
-    });
+    const res = await followRedirects(url, cfg, controller.signal);
     if (!res.ok) throw new CountError(statusFromHttp(res.status), `HTTP ${res.status}`);
 
     const len = Number(res.headers.get('content-length'));

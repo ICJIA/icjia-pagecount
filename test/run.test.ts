@@ -55,9 +55,9 @@ describe('run — spreadsheet mode (end-to-end)', () => {
   it('writes an output csv with a PageCount column', async () => {
     const file = await writeTemp(`Name,Link\nA,${base}/a.pdf\nB,\n`, 'data.csv');
     const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-    const code = await run([file], resolveConfig({}));
+    const code = await run([file], resolveConfig({ allowPrivateHosts: true }));
     expect(code).toBe(0);
-    const outPath = outputPathFor(file, resolveConfig({}));
+    const outPath = outputPathFor(file, resolveConfig({ allowPrivateHosts: true }));
     await stat(outPath); // throws if missing
     const text = await readFile(outPath, 'utf8');
     expect(text).toContain('Name,Link,PageCount');

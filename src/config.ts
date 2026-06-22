@@ -9,6 +9,7 @@ export interface Config {
   timeout: number; // milliseconds
   maxSize: number; // bytes
   docxRender: boolean;
+  allowPrivateHosts: boolean;
 }
 
 export interface RawOptions {
@@ -22,6 +23,7 @@ export interface RawOptions {
   timeout?: string | number;
   maxSize?: string | number;
   docxRender?: boolean;
+  allowPrivateHosts?: boolean;
 }
 
 export const DEFAULTS = {
@@ -53,5 +55,6 @@ export function resolveConfig(raw: RawOptions): Config {
     timeout: positive(raw.timeout, DEFAULTS.timeoutSec) * 1000,
     maxSize: positive(raw.maxSize, DEFAULTS.maxSizeMb) * 1024 * 1024,
     docxRender: raw.docxRender ?? false,
+    allowPrivateHosts: raw.allowPrivateHosts ?? false,
   };
 }

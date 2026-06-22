@@ -19,4 +19,11 @@ describe('zip helper', () => {
     const zip = await loadZip(file);
     expect(entryText(zip, 'hello.txt')).toBe('hi');
   });
+
+  it('drops entries whose declared size exceeds the per-entry cap', () => {
+    const bytes = zipBytes({ 'small.txt': 'ok', 'big.txt': 'x'.repeat(2048) });
+    const zip = loadZipFromBytes(bytes, { maxEntryBytes: 64 });
+    expect(entryText(zip, 'small.txt')).toBe('ok');
+    expect('big.txt' in zip).toBe(false);
+  });
 });

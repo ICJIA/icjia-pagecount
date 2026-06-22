@@ -36,7 +36,7 @@ beforeAll(async () => {
 
 afterAll(() => new Promise<void>((r) => server.close(() => r())));
 
-const cfg = resolveConfig({});
+const cfg = resolveConfig({ allowPrivateHosts: true });
 
 describe('fetchToTempFile', () => {
   it('downloads a file and reports content-type', async () => {
@@ -58,12 +58,22 @@ describe('fetchToTempFile', () => {
   });
 
   it('times out slow responses', async () => {
-    const fast = resolveConfig({ timeout: '0.1' });
+    const fast = resolveConfig({ timeout: '0.1', allowPrivateHosts: true });
     try {
       await fetchToTempFile(`${base}/slow`, fast);
       throw new Error('should have thrown');
     } catch (err) {
       expect(statusFromFetchError(err)).toBe('timeout');
+    }
+  });
+
+  it('blocks loopback hosts without --allow-private-hosts (SSRF guard)', async () => {
+    const guarded = resolveConfig({});
+    try {
+      await fetchToTempFile(`${base}/ok.pdf`, guarded);
+      throw new Error('should have thrown');
+    } catch (err) {
+      expect(statusFromFetchError(err)).toBe('network-error');
     }
   });
 });
