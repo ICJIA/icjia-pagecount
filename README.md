@@ -2,9 +2,9 @@
 
 > Add exact page counts to a spreadsheet of document URLs — or check a single file from the command line.
 
-**Status:** Implemented, tested, and security-hardened (109 passing tests). Built from the
-[design spec](docs/superpowers/specs/2026-06-22-pagecount-cli-design.md); not yet
-published to npm — install from a clone (see below).
+**Status:** Published on npm as [`@icjia/pagecount`](https://www.npmjs.com/package/@icjia/pagecount) —
+implemented, tested, and security-hardened (109 passing tests). Built from the
+[design spec](docs/superpowers/specs/2026-06-22-pagecount-cli-design.md).
 
 `pagecount` is a command-line tool with two modes, chosen automatically by what you give it:
 
@@ -25,7 +25,7 @@ published to npm — install from a clone (see below).
 
 ## Install
 
-**Run without installing** (once published to npm):
+**Run without installing:**
 
 ```bash
 npx @icjia/pagecount data.csv
@@ -34,7 +34,7 @@ npx @icjia/pagecount data.csv
 **Install globally:**
 
 ```bash
-npm i -g @icjia/pagecount                  # once published to npm
+npm i -g @icjia/pagecount
 npm i -g github:ICJIA/pagecount            # or straight from GitHub (builds on install)
 ```
 
