@@ -12,7 +12,7 @@ export function buildProgram(): Command {
     .argument('<input...>', 'spreadsheets (.csv/.xlsx) and/or documents (.pdf/.docx/.pptx or a URL)')
     .option('-o, --output <dir>', 'force one shared output dir (default: .pagecount-output beside each file)')
     .option('-c, --column <name|index>', 'URL column: header name or 1-based index (default: auto-detect)')
-    .option('--count-column <name>', 'name of the added column (default: PageCount)')
+    .option('--count-column <name>', 'count column name; a <name>_notes column is added too (default: programmatic_page_count)')
     .option('--suffix <text>', 'output filename suffix (default: pagecount)')
     .option('--json', 'emit JSON (sidecar in spreadsheet mode; stdout in document mode)')
     .option('-q, --quiet', 'document mode: print only the page number')
@@ -21,7 +21,7 @@ export function buildProgram(): Command {
     .option('--max-size <mb>', 'skip files larger than this (default: 100)')
     .option('--docx-render', 'force LibreOffice render for docx')
     .option('--allow-private-hosts', 'allow fetching loopback/private/link-local hosts (off by default for SSRF safety)')
-    .version('0.1.0');
+    .version('0.1.1');
   return program;
 }
 

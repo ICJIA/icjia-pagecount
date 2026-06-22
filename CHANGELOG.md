@@ -4,6 +4,13 @@ All notable changes to `pagecount` are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and the project follows
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] — 2026-06-22
+
+### Added
+
+- A **TOTAL row** at the bottom of each output spreadsheet (CSV and XLSX) that sums
+  `programmatic_page_count` under that column, labelled `TOTAL` in the first column.
+
 ## [0.1.0] — 2026-06-22
 
 Initial release.
@@ -52,4 +59,5 @@ Initial release.
   being passed to external tools, so a leading-dash filename can't be read as an
   option.
 
+[0.1.1]: https://github.com/ICJIA/pagecount/releases/tag/v0.1.1
 [0.1.0]: https://github.com/ICJIA/pagecount/releases/tag/v0.1.0
