@@ -23,3 +23,12 @@ export async function writeTemp(bytes: Uint8Array | string, name = 'f.bin'): Pro
   await writeFile(file, bytes);
   return file;
 }
+
+export function pptxBytes(slides: number): Uint8Array {
+  const ids = Array.from({ length: slides }, (_, i) =>
+    `<p:sldId id="${256 + i}" r:id="rId${i + 1}"/>`).join('');
+  const xml =
+    `<?xml version="1.0"?><p:presentation xmlns:p="p" xmlns:r="r">` +
+    `<p:sldIdLst>${ids}</p:sldIdLst></p:presentation>`;
+  return zipBytes({ 'ppt/presentation.xml': xml });
+}
