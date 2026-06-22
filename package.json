@@ -1,0 +1,32 @@
+{
+  "name": "@icjia/pagecount",
+  "version": "0.1.0",
+  "description": "Add exact page counts to a spreadsheet of document URLs, or check a single file.",
+  "type": "module",
+  "bin": { "pagecount": "dist/cli.js" },
+  "files": ["dist"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "csv-parse": "^5.5.6",
+    "csv-stringify": "^6.5.1",
+    "exceljs": "^4.4.0",
+    "fast-xml-parser": "^4.4.1",
+    "fflate": "^0.8.2",
+    "p-limit": "^6.1.0",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsup": "^8.2.4",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}
