@@ -2,15 +2,16 @@
 
 > Add exact page counts to a spreadsheet of document URLs — or check a single file from the command line.
 
-**Status:** Implemented and tested (90 passing tests). Built from the
+**Status:** Implemented, tested, and security-hardened (109 passing tests). Built from the
 [design spec](docs/superpowers/specs/2026-06-22-pagecount-cli-design.md); not yet
 published to npm — install from a clone (see below).
 
 `pagecount` is a command-line tool with two modes, chosen automatically by what you give it:
 
 - **Spreadsheet mode** — given a CSV or XLSX with a column of public document URLs
-  (PDF, DOCX, PPTX), it reads each file, counts its pages, and writes a copy of the
-  spreadsheet with an added `PageCount` column.
+  (PDF, DOCX, PPTX), it reads each file, counts its pages, and writes the spreadsheet
+  with `programmatic_page_count` + `programmatic_page_count_notes` columns appended —
+  as both a `.csv` and an `.xlsx`.
 - **Document mode** — given a single document (a local file or a URL), it prints the
   page count and exits, writing nothing.
 
@@ -19,6 +20,8 @@ published to npm — install from a clone (see below).
 - **Node.js 20+** (uses the built-in `fetch`).
 - **LibreOffice** *(optional)* — only needed to compute exact page counts for DOCX
   files that don't carry cached page metadata. See [DOCX page counts](#docx-page-counts).
+- **poppler** (`pdfinfo`) *(optional)* — fallback for counting encrypted or unusual
+  PDFs the built-in parser can't read. `brew install poppler`.
 
 ## Install
 
@@ -115,7 +118,7 @@ Nothing is written to disk. Exits non-zero if the file can't be counted.
 
 | Type | Method | Exact? |
 |---|---|---|
-| **PDF** | page count read directly from the file | ✅ yes |
+| **PDF** | read from the file (with a `pdfinfo`/poppler fallback for encrypted/unusual PDFs) | ✅ yes |
 | **PPTX** | slide count from `presentation.xml` | ✅ yes |
 | **DOCX** | see below | ⚠️ depends |
 
@@ -131,8 +134,10 @@ page size. `pagecount` handles DOCX in two ways:
    you pass `--docx-render`), `pagecount` renders the document to PDF and counts the
    pages — the authoritative count.
 
-If a DOCX has no cached value and LibreOffice isn't available, its `PageCount` is left
-blank (spreadsheet mode) or reported as an error (document mode).
+If a DOCX has no cached value and LibreOffice isn't available, its
+`programmatic_page_count` is left blank (spreadsheet mode) or reported as an error
+(document mode). Counted DOCX rows are flagged as an estimate in the notes column —
+pagination depends on fonts and margins.
 
 ## Output & errors (spreadsheet mode)
 
@@ -177,7 +182,7 @@ page counts are estimates (pagination depends on fonts, margins, and page size).
 ```bash
 npm install
 npm run build      # bundle to dist/
-npm test           # vitest (90 tests)
+npm test           # vitest (109 tests)
 ```
 
 See the [design spec](docs/superpowers/specs/2026-06-22-pagecount-cli-design.md) for
