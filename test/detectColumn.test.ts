@@ -14,6 +14,26 @@ describe('detectUrlColumn', () => {
   it('auto-detects the column with the most URLs', () => {
     expect(detectUrlColumn(table)).toBe(2);
   });
+  it('prefers a column of document URLs over a column of page URLs', () => {
+    const t: Table = {
+      header: ['Title', 'Page URL', 'File URL'],
+      rows: [
+        ['A', 'https://site.org/news/a', 'https://site.org/files/a.pdf'],
+        ['B', 'https://site.org/news/b', 'https://site.org/files/b.docx'],
+      ],
+    };
+    expect(detectUrlColumn(t)).toBe(2); // File URL, not Page URL
+  });
+  it('falls back to any URL column when none link to documents', () => {
+    const t: Table = {
+      header: ['Title', 'Link'],
+      rows: [
+        ['A', 'https://site.org/page-a'],
+        ['B', 'https://site.org/page-b'],
+      ],
+    };
+    expect(detectUrlColumn(t)).toBe(1);
+  });
   it('honors an override by header name (case-insensitive)', () => {
     expect(detectUrlColumn(table, 'link')).toBe(2);
   });
