@@ -2,6 +2,7 @@ import { extname } from 'node:path';
 import type { AppendColumn } from '../types';
 import { readCsv, writeCsv } from './csv';
 import { readXlsx, writeXlsx, writeXlsxFromData } from './xlsx';
+import { buildTotalRow } from './total';
 
 export interface LoadedSpreadsheet {
   header: string[];
@@ -25,6 +26,10 @@ function appended(
   };
 }
 
+function csvTotalRow(originalCols: number, columns: AppendColumn[]): string[] {
+  return buildTotalRow(originalCols, columns).map((v) => (typeof v === 'number' ? String(v) : v));
+}
+
 export async function readSpreadsheet(path: string): Promise<LoadedSpreadsheet> {
   const ext = extname(path).toLowerCase();
 
@@ -35,7 +40,7 @@ export async function readSpreadsheet(path: string): Promise<LoadedSpreadsheet> 
       rows,
       writeCsv: (outPath, columns) => {
         const t = appended(header, rows, columns);
-        return writeCsv(outPath, t.header, t.rows);
+        return writeCsv(outPath, t.header, [...t.rows, csvTotalRow(header.length, columns)]);
       },
       writeXlsx: (outPath, columns) => writeXlsxFromData(outPath, header, rows, columns),
     };
@@ -48,7 +53,7 @@ export async function readSpreadsheet(path: string): Promise<LoadedSpreadsheet> 
       rows: data.rows,
       writeCsv: (outPath, columns) => {
         const t = appended(data.header, data.rows, columns);
-        return writeCsv(outPath, t.header, t.rows);
+        return writeCsv(outPath, t.header, [...t.rows, csvTotalRow(data.header.length, columns)]);
       },
       writeXlsx: (outPath, columns) => writeXlsx(data, outPath, columns),
     };

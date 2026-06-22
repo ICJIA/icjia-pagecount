@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import type { AppendColumn } from '../types';
 import { sanitizeCell } from './sanitize';
+import { buildTotalRow } from './total';
 
 export interface XlsxData {
   header: string[];
@@ -29,8 +30,12 @@ export async function readXlsx(path: string): Promise<XlsxData> {
   return { header, rows, workbook, sheet };
 }
 
-// Append columns to the already-loaded workbook and write it out, preserving the
-// original formatting and any other sheets.
+function san(value: string | number): string | number {
+  return typeof value === 'string' ? sanitizeCell(value) : value;
+}
+
+// Append columns to the already-loaded workbook (preserving its formatting and other
+// sheets) plus a TOTAL row at the bottom, then write it out.
 export async function writeXlsx(
   data: Pick<XlsxData, 'workbook' | 'sheet'>,
   outPath: string,
@@ -44,16 +49,21 @@ export async function writeXlsx(
     for (let i = 0; i < col.values.length; i++) {
       const value = col.values[i];
       if (value != null && value !== '') {
-        sheet.getRow(i + 2).getCell(c).value =
-          typeof value === 'string' ? sanitizeCell(value) : value;
+        sheet.getRow(i + 2).getCell(c).value = typeof value === 'string' ? sanitizeCell(value) : value;
       }
     }
+  });
+  // TOTAL row: "TOTAL" in the first column, the sum under each numeric appended column.
+  const totalRow = buildTotalRow(start, columns);
+  const totalRowIdx = sheet.rowCount + 1;
+  totalRow.forEach((v, c) => {
+    if (v !== '') sheet.getRow(totalRowIdx).getCell(c + 1).value = san(v);
   });
   await workbook.xlsx.writeFile(outPath);
 }
 
-// Build a fresh workbook from plain header/rows plus appended columns. Used to emit
-// an XLSX version of a CSV input (numeric values stay numeric).
+// Build a fresh workbook from plain header/rows plus appended columns and a TOTAL row.
+// Used to emit an XLSX version of a CSV input (numeric values stay numeric).
 export async function writeXlsxFromData(
   outPath: string,
   header: string[],
@@ -62,13 +72,14 @@ export async function writeXlsxFromData(
 ): Promise<void> {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Sheet1');
-  sheet.addRow([...header, ...columns.map((c) => c.header)].map((v) => (typeof v === 'string' ? sanitizeCell(v) : v)));
+  sheet.addRow([...header, ...columns.map((c) => c.header)].map(san));
   rows.forEach((r, i) => {
     const extra = columns.map((c) => {
       const v = c.values[i];
       return v == null || v === '' ? '' : v;
     });
-    sheet.addRow([...r, ...extra].map((v) => (typeof v === 'string' ? sanitizeCell(v) : v)));
+    sheet.addRow([...r, ...extra].map(san));
   });
+  sheet.addRow(buildTotalRow(header.length, columns).map(san));
   await workbook.xlsx.writeFile(outPath);
 }
