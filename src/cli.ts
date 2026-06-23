@@ -13,6 +13,9 @@ export function buildProgram(): Command {
     .option('-o, --output <dir>', 'force one shared output dir (default: .pagecount-output beside each file)')
     .option('-c, --column <name|index>', 'URL column: header name or 1-based index (default: auto-detect)')
     .option('--count-column <name>', 'count column name; a <name>_notes column is added too (default: programmatic_page_count)')
+    .option('--filter-column <name|index>', 'only count rows matching --filter-value; header name or 1-based index (default: Recommendation)')
+    .option('--filter-value <values>', 'comma-separated value(s) to match, exact & case-insensitive (default: remediate)')
+    .option('--no-filter', 'count every row, ignoring the default Recommendation filter')
     .option('--suffix <text>', 'output filename suffix (default: pagecount)')
     .option('--json', 'emit JSON (sidecar in spreadsheet mode; stdout in document mode)')
     .option('-q, --quiet', 'document mode: print only the page number')
@@ -41,6 +44,9 @@ export async function main(argv: string[]): Promise<void> {
     maxSize: opts.maxSize,
     docxRender: opts.docxRender,
     allowPrivateHosts: opts.allowPrivateHosts,
+    filterColumn: opts.filterColumn,
+    filterValue: opts.filterValue,
+    noFilter: opts.filter === false,
   });
   process.exitCode = await run(program.args, cfg);
 }

@@ -9,6 +9,23 @@ describe('buildProgram', () => {
     expect(p.args).toEqual(['a.csv', 'b.pdf']);
     expect(p.opts()).toMatchObject({ concurrency: '4', json: true });
   });
+
+  it('defaults filter on when --no-filter is absent', () => {
+    const p = buildProgram().exitOverride();
+    p.parse(['node', 'pagecount', 'a.csv']);
+    expect(p.opts().filter).toBe(true);
+  });
+
+  it('parses filter options and --no-filter', () => {
+    const p = buildProgram().exitOverride();
+    p.parse([
+      'node', 'pagecount', 'a.csv',
+      '--filter-column', 'Recommendation', '--filter-value', 'remediate,true', '--no-filter',
+    ]);
+    expect(p.opts()).toMatchObject({
+      filterColumn: 'Recommendation', filterValue: 'remediate,true', filter: false,
+    });
+  });
 });
 
 describe('main', () => {
