@@ -35,4 +35,58 @@ describe('processSpreadsheet', () => {
     expect(results[0].row).toBe(2);
     expect(summary).toMatchObject({ total: 4, counted: 1, noUrl: 2, failed: 1 });
   });
+
+  it('by default counts only rows whose Recommendation is remediate', async () => {
+    const csv = `File,Recommendation,Link\n` +
+      `A,Remediate,${base}/a.pdf\n` +
+      `B,Accessible,${base}/a.pdf\n` +
+      `C,remediate,${base}/a.pdf\n`;
+    const file = await writeTemp(csv, 'rec.csv');
+    const { results, counts, summary } =
+      await processSpreadsheet(file, resolveConfig({ allowPrivateHosts: true }));
+    expect(results.map((r) => r.status)).toEqual(['ok', 'filtered', 'ok']);
+    expect(counts).toEqual([3, null, 3]);
+    expect(summary).toMatchObject({ counted: 2, filtered: 1, totalPages: 6 });
+  });
+
+  it('never fetches filtered rows', async () => {
+    // The non-matching row points at a URL the server 404s. If it were fetched the
+    // status would be 'not-found'; filtering must short-circuit it to 'filtered'.
+    const csv = `File,Recommendation,Link\nB,Accessible,${base}/missing.pdf\n`;
+    const file = await writeTemp(csv, 'nofetch.csv');
+    const { results } = await processSpreadsheet(file, resolveConfig({ allowPrivateHosts: true }));
+    expect(results[0].status).toBe('filtered');
+  });
+
+  it('matches any of several --filter-value alternatives, case-insensitively', async () => {
+    const csv = `File,Recommendation,Link\nA,Remediate,${base}/a.pdf\nB,TRUE,${base}/a.pdf\n`;
+    const file = await writeTemp(csv, 'multi.csv');
+    const cfg = resolveConfig({ allowPrivateHosts: true, filterValue: 'remediate,true' });
+    const { results } = await processSpreadsheet(file, cfg);
+    expect(results.map((r) => r.status)).toEqual(['ok', 'ok']);
+  });
+
+  it('counts every row and warns when the default column is absent', async () => {
+    const csv = `Name,Link\nA,${base}/a.pdf\n`;
+    const file = await writeTemp(csv, 'nocol.csv');
+    const { results, warnings } =
+      await processSpreadsheet(file, resolveConfig({ allowPrivateHosts: true }));
+    expect(results.map((r) => r.status)).toEqual(['ok']);
+    expect(warnings.join(' ')).toMatch(/Recommendation/);
+  });
+
+  it('throws when an explicit --filter-column is missing', async () => {
+    const csv = `Name,Link\nA,${base}/a.pdf\n`;
+    const file = await writeTemp(csv, 'explicit.csv');
+    const cfg = resolveConfig({ allowPrivateHosts: true, filterColumn: 'Disposition' });
+    await expect(processSpreadsheet(file, cfg)).rejects.toThrow(/Disposition/);
+  });
+
+  it('counts all rows with noFilter even when Recommendation exists', async () => {
+    const csv = `File,Recommendation,Link\nA,Remediate,${base}/a.pdf\nB,Accessible,${base}/a.pdf\n`;
+    const file = await writeTemp(csv, 'all.csv');
+    const cfg = resolveConfig({ allowPrivateHosts: true, noFilter: true });
+    const { results } = await processSpreadsheet(file, cfg);
+    expect(results.map((r) => r.status)).toEqual(['ok', 'ok']);
+  });
 });

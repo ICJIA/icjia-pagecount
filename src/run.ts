@@ -23,7 +23,8 @@ export function outputPathFor(inputPath: string, cfg: Config): string {
 }
 
 async function runSpreadsheet(path: string, cfg: Config): Promise<void> {
-  const { loaded, results, summary, counts } = await processSpreadsheet(path, cfg);
+  const { loaded, results, summary, counts, warnings } = await processSpreadsheet(path, cfg);
+  for (const w of warnings) console.warn(w);
   const notes = results.map(rowNote);
   const columns = [
     { header: cfg.countColumn, values: counts },
