@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { readFile, mkdtemp as realMkdtemp } from 'node:fs/promises';
 import { fetchToTempFile } from '../src/fetch';
 import { resolveConfig } from '../src/config';
 import { statusFromFetchError } from '../src/errors';
@@ -65,6 +66,21 @@ describe('fetchToTempFile', () => {
     } catch (err) {
       expect(statusFromFetchError(err)).toBe('timeout');
     }
+  });
+
+  it('cleans up the temp dir when opening the temp file fails', async () => {
+    const created: string[] = [];
+    const io = {
+      mkdtemp: async (prefix: string) => {
+        const dir = await realMkdtemp(prefix);
+        created.push(dir);
+        return dir;
+      },
+      open: async () => { throw new Error('EMFILE: too many open files'); },
+    };
+    await expect(fetchToTempFile(`${base}/ok.pdf`, cfg, io)).rejects.toThrow(/EMFILE/);
+    expect(created.length).toBeGreaterThan(0);
+    for (const dir of created) expect(existsSync(dir)).toBe(false);
   });
 
   it('blocks loopback hosts without --allow-private-hosts (SSRF guard)', async () => {

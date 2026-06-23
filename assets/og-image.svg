@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="pagecount — exact page counts for a spreadsheet of document URLs">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#181F3A"/>
+      <stop offset="1" stop-color="#0D1222"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.80" cy="0.26" r="0.62">
+      <stop offset="0" stop-color="#F4B53F" stop-opacity="0.16"/>
+      <stop offset="0.55" stop-color="#F4B53F" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#F4B53F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1E2649"/>
+      <stop offset="1" stop-color="#141A34"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- ===================== LEFT: identity ===================== -->
+  <text x="82" y="148" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="5" fill="#6E7AA0">ICJIA &#183; OPEN-SOURCE CLI</text>
+
+  <text x="78" y="254" font-family="Menlo, 'SF Mono', 'DejaVu Sans Mono', monospace" font-size="92" font-weight="700" letter-spacing="-3"><tspan fill="#F4F2EC">page</tspan><tspan fill="#F4B53F">count</tspan></text>
+  <rect x="82" y="276" width="66" height="5" rx="2.5" fill="#F4B53F"/>
+
+  <text x="83" y="330" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="29" font-weight="400" fill="#BBC2D8">Exact page counts for a spreadsheet</text>
+  <text x="83" y="368" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="29" font-weight="400" fill="#BBC2D8">of document URLs &#8212; or a single file.</text>
+
+  <!-- command chip -->
+  <rect x="82" y="412" width="474" height="56" rx="12" fill="#151C39" stroke="#2F3A64" stroke-width="1.5"/>
+  <text x="106" y="448" font-family="Menlo, 'SF Mono', 'DejaVu Sans Mono', monospace" font-size="23" font-weight="500"><tspan fill="#F4B53F">$</tspan><tspan fill="#D9DEEE">&#160;npx @icjia/pagecount data.csv</tspan></text>
+
+  <text x="84" y="556" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="4" fill="#6E7AA0">PDF &#183; DOCX &#183; PPTX &#160;&#183;&#160; NODE 20+ &#160;&#183;&#160; MIT</text>
+
+  <!-- ===================== RIGHT: the count column ===================== -->
+  <rect x="616" y="150" width="512" height="356" rx="20" fill="url(#card)" stroke="#303B66" stroke-width="1.5"/>
+
+  <!-- ruler-tick spine: pages, measured -->
+  <g stroke="#5E80B0" stroke-opacity="0.45" stroke-width="1.5">
+    <line x1="616" y1="192" x2="624" y2="192"/>
+    <line x1="616" y1="207" x2="628" y2="207"/>
+    <line x1="616" y1="222" x2="624" y2="222"/>
+    <line x1="616" y1="237" x2="624" y2="237"/>
+    <line x1="616" y1="252" x2="628" y2="252"/>
+    <line x1="616" y1="267" x2="624" y2="267"/>
+    <line x1="616" y1="282" x2="624" y2="282"/>
+    <line x1="616" y1="297" x2="628" y2="297"/>
+    <line x1="616" y1="312" x2="624" y2="312"/>
+    <line x1="616" y1="327" x2="624" y2="327"/>
+    <line x1="616" y1="342" x2="628" y2="342"/>
+    <line x1="616" y1="357" x2="624" y2="357"/>
+    <line x1="616" y1="372" x2="624" y2="372"/>
+    <line x1="616" y1="387" x2="628" y2="387"/>
+    <line x1="616" y1="402" x2="624" y2="402"/>
+    <line x1="616" y1="417" x2="624" y2="417"/>
+    <line x1="616" y1="432" x2="628" y2="432"/>
+    <line x1="616" y1="447" x2="624" y2="447"/>
+    <line x1="616" y1="462" x2="624" y2="462"/>
+  </g>
+
+  <!-- header -->
+  <text x="656" y="208" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="3" fill="#6E7AA0">DOCUMENT</text>
+  <text x="1092" y="208" text-anchor="end" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="3" fill="#6E7AA0">PAGES</text>
+  <line x1="640" y1="224" x2="1104" y2="224" stroke="#303B66" stroke-width="1"/>
+
+  <!-- rows -->
+  <g font-family="Menlo, 'SF Mono', 'DejaVu Sans Mono', monospace" font-size="24">
+    <text x="656" y="266" fill="#C4CADE">fy2023-annual-report.pdf</text>
+    <text x="1092" y="266" text-anchor="end" font-size="25" font-weight="700" fill="#F4B53F">48</text>
+
+    <text x="656" y="308" fill="#C4CADE">2024-board-minutes.docx</text>
+    <text x="1092" y="308" text-anchor="end" font-size="25" font-weight="700" fill="#F4B53F">6</text>
+
+    <text x="656" y="350" fill="#C4CADE">q1-data-brief.pdf</text>
+    <text x="1092" y="350" text-anchor="end" font-size="25" font-weight="700" fill="#F4B53F">12</text>
+
+    <text x="656" y="392" fill="#C4CADE">program-evaluation.pptx</text>
+    <text x="1092" y="392" text-anchor="end" font-size="25" font-weight="700" fill="#F4B53F">21</text>
+  </g>
+
+  <!-- total -->
+  <line x1="640" y1="418" x2="1104" y2="418" stroke="#3C4878" stroke-width="1.5"/>
+  <text x="656" y="462" font-family="Menlo, 'SF Mono', 'DejaVu Sans Mono', monospace" font-size="22" font-weight="700" letter-spacing="2" fill="#F4F2EC">TOTAL</text>
+  <text x="1058" y="466" text-anchor="end" font-family="Menlo, 'SF Mono', 'DejaVu Sans Mono', monospace" font-size="44" font-weight="700" fill="#F4B53F">87</text>
+  <text x="1092" y="466" text-anchor="end" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#8A93B4">pp</text>
+</svg>

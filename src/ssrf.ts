@@ -5,13 +5,16 @@ import { CountError } from './errors';
 function ipv4IsPrivate(ip: string): boolean {
   const p = ip.split('.').map(Number);
   if (p.length !== 4 || p.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return false;
-  const [a, b] = p as [number, number, number, number];
+  const [a, b, c] = p as [number, number, number, number];
   if (a === 0 || a === 127) return true;             // unspecified / loopback
   if (a === 10) return true;                          // private
   if (a === 172 && b >= 16 && b <= 31) return true;   // private
   if (a === 192 && b === 168) return true;            // private
   if (a === 169 && b === 254) return true;            // link-local
   if (a === 100 && b >= 64 && b <= 127) return true;  // CGNAT
+  if (a === 192 && b === 0 && c === 0) return true;   // 192.0.0.0/24 IETF protocol assignments
+  if (a === 198 && (b === 18 || b === 19)) return true; // 198.18.0.0/15 benchmarking
+  if (a >= 224) return true;                          // 224/4 multicast, 240/4 reserved, 255.255.255.255 broadcast
   return false;
 }
 

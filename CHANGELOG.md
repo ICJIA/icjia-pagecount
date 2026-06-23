@@ -4,6 +4,38 @@ All notable changes to `pagecount` are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and the project follows
 [Semantic Versioning](https://semver.org/).
 
+## [0.2.3] — 2026-06-23
+
+### Security
+
+Hardening from a red/blue-team audit (see the audit log in the README); all 7 findings
+resolved and covered by the test suite (149 tests):
+
+- **Fixed a `zip64` entry-count DoS** — a tiny crafted DOCX/PPTX could declare up to 2³²
+  central-directory entries and freeze the synchronous unzip (and its own timers) for
+  minutes. Archives whose declared entry count cannot fit in the file are now rejected
+  before unzipping.
+- **Sandboxed PDF parsing** — `PDFDocument.load` now runs in an isolated worker thread
+  bounded by a 30 s wall-clock timeout and a 768 MB heap cap, so a malicious PDF (e.g.
+  multi-GB FlateDecode inflation) can hang or OOM only that worker, not the whole run; a
+  budget breach is reported as `too-large`, with a graceful in-process fallback.
+- **Bounded DOCX/PPTX memory** — ZIP loading inflates only the entries each format needs
+  (`docProps/app.xml`, `ppt/presentation.xml`, slide parts), so embedded media/fonts are
+  never decompressed.
+- **Broadened the SSRF block-list** to cover `198.18.0.0/15`, `192.0.0.0/24`, and
+  `224.0.0.0`–`255.255.255.255`.
+- **Closed a CSV/Excel formula-injection gap** — `sanitizeCell` now also guards a leading
+  newline (`\n`).
+- **Removed a temp-dir leak** when opening the download file fails, and a redundant
+  full-file copy during ZIP loading.
+
+### Added
+
+- Social/banner image (`assets/og-image.svg` + rendered `.png`) and status badges in the
+  README.
+- Expanded README: an `npx` quick start, a recipe for every CLI flag, shell-alias user
+  stories, a table of contents, and a red/blue-team security audit log.
+
 ## [0.2.2] — 2026-06-23
 
 ### Changed

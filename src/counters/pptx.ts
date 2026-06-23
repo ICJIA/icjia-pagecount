@@ -12,7 +12,9 @@ function countSldIds(xml: string): number {
 
 export async function countPptx(filePath: string): Promise<CountOutcome> {
   try {
-    const zip = await loadZip(filePath);
+    const zip = await loadZip(filePath, {
+      only: (n) => n === 'ppt/presentation.xml' || /^ppt\/slides\/slide\d+\.xml$/.test(n),
+    });
     const xml = entryText(zip, 'ppt/presentation.xml');
     if (xml) {
       const n = countSldIds(xml);

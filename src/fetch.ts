@@ -1,4 +1,4 @@
-import { mkdtemp, rm, open } from 'node:fs/promises';
+import { mkdtemp, rm, open, type FileHandle } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
@@ -11,6 +11,13 @@ export interface FetchedFile {
   contentType: string | null;
   cleanup: () => Promise<void>;
 }
+
+// Filesystem seam — injectable so the temp-file failure path can be tested.
+export interface FetchIO {
+  mkdtemp: (prefix: string) => Promise<string>;
+  open: (path: string, flags: string) => Promise<FileHandle>;
+}
+const defaultIO: FetchIO = { mkdtemp, open };
 
 const MAX_REDIRECTS = 5;
 const USER_AGENT = 'pagecount/0.1 (+https://github.com/ICJIA/pagecount)';
@@ -31,7 +38,11 @@ async function followRedirects(initialUrl: string, cfg: Config, signal: AbortSig
   throw new CountError('network-error', 'too many redirects');
 }
 
-export async function fetchToTempFile(url: string, cfg: Config): Promise<FetchedFile> {
+export async function fetchToTempFile(
+  url: string,
+  cfg: Config,
+  io: FetchIO = defaultIO,
+): Promise<FetchedFile> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), cfg.timeout);
   try {
@@ -44,11 +55,18 @@ export async function fetchToTempFile(url: string, cfg: Config): Promise<Fetched
     }
     if (!res.body) throw new CountError('network-error', 'empty response body');
 
-    const dir = await mkdtemp(join(tmpdir(), 'pc-fetch-'));
+    const dir = await io.mkdtemp(join(tmpdir(), 'pc-fetch-'));
     const tempPath = join(dir, 'download');
     const cleanup = () => rm(dir, { recursive: true, force: true });
 
-    const handle = await open(tempPath, 'w');
+    // Remove the temp dir if we can't even open the destination file (e.g. EMFILE).
+    let handle;
+    try {
+      handle = await io.open(tempPath, 'w');
+    } catch (err) {
+      await cleanup();
+      throw err;
+    }
     let written = 0;
     try {
       for await (const chunk of Readable.fromWeb(res.body as Parameters<typeof Readable.fromWeb>[0])) {

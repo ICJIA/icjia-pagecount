@@ -44,7 +44,9 @@ export async function sniffType(filePath: string): Promise<FileType | null> {
   if (bytes.length >= 4 &&
       bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04) {
     try {
-      const zip = loadZipFromBytes(bytes);
+      const zip = loadZipFromBytes(bytes, {
+        only: (n) => n === 'ppt/presentation.xml' || n === 'word/document.xml',
+      });
       if ('ppt/presentation.xml' in zip) return 'pptx';
       if ('word/document.xml' in zip) return 'docx';
     } catch {

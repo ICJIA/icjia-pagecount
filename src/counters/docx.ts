@@ -33,7 +33,7 @@ export async function countDocx(
 ): Promise<CountOutcome> {
   let metadata: number | null = null;
   try {
-    const zip = await loadZip(filePath);
+    const zip = await loadZip(filePath, { only: (n) => n === 'docProps/app.xml' });
     metadata = pagesFromAppXml(entryText(zip, 'docProps/app.xml'));
   } catch (err) {
     return { pageCount: null, status: 'corrupt', error: err instanceof Error ? err.message : String(err) };
